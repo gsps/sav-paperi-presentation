@@ -1,0 +1,33 @@
+Questions SAV paper I presentation
+=====
+
+SECTION 2
+
+* Intuition on qualifier lattice: losing information/capabilites as we go up the lattice
+** During typing the resulting type qualifier increase monotonically
+** What is a two-point lattice?
+** What is \bottom of this lattice? What is \top?
+** "Subset contradiction" wrt. \tau \subseteq const \tau (cf. dual notation as negative qualifier "writable" / consider const as "read-only" / rewrite as "ConstInt" >= "NormalInt" class hierarchy)
+** (What is a type constructor?)
+** What's the difference between assertions and annotations?
+** Follow-up: What's the difference between Q and l?
+
+* Ad Observation 1: Could we use \top instead? Any other qualifier?
+
+* Why do they introduce Unit / ()? (Hint: Why only along with references?)
+
+SECTION 3
+
+* Polymorphism only applies to qualifiers
+* Lemma 1: What's the type of substitution S? / Why don't we apply S to e?
+* What about the soundness corollary?
+
+SECTION 4
+
+* Immutability of let variable
+* FDP is not really a call graph
+
+
+DISCUSSION
+
+* Ad restriction of qualifier combinations / qualifier-term combinations. Paper gives no general recipes that ensures soundness. Remark difference to previous paper.
