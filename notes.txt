@@ -8,7 +8,6 @@ SECTION 2
 ** What is a two-point lattice?
 ** What is \bottom of this lattice? What is \top?
 ** "Subset contradiction" wrt. \tau \subseteq const \tau (cf. dual notation as negative qualifier "writable" / consider const as "read-only" / rewrite as "ConstInt" >= "NormalInt" class hierarchy)
-** (What is a type constructor?)
 ** What's the difference between assertions and annotations?
 ** Follow-up: What's the difference between Q and l?
 
@@ -30,4 +29,5 @@ SECTION 4
 
 DISCUSSION
 
+* What is a type constructor? (How is it different from an ``ordinary'' constructor?)
 * Ad restriction of qualifier combinations / qualifier-term combinations. Paper gives no general recipes that ensures soundness. Remark difference to previous paper.
