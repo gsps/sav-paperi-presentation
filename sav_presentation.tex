@@ -30,6 +30,7 @@ PLDI 1999}
 \begin{frame}{Overview}
   \begin{itemize}
   \item Many languages support a range of \emph{type qualifiers} -- they enable a simple, yet useful form of subtyping.
+      \todo{Give concrete examples of qualifiers}
 
   \item Authors present a framework for adding type qualifiers to $\lambda$-calculi.
 
@@ -65,7 +66,8 @@ const int *id2(const int *x) { return x; }
 \end{frame}
 
 \note[itemize]{%
-  \item\emph{Q:} What does \textsc{const} in C mean?}
+  \item\emph{Q:} What does \textsc{const} in C mean?
+  \todo{Will we show this to students? Why as notes?}}
 
 
 \begin{frame}{Preliminaries}{Basic syntax / notation / definitions}
@@ -82,7 +84,8 @@ const int *id2(const int *x) { return x; }
 \note[itemize]{%
   \item\emph{Q:} What is a two-point lattice?\\
   \item\emph{Q:} What is $\bot$ of this lattice? What is $\top$?\\
-  \item\emph{Q:} ``Subset contradiction'' wrt.\ $\tau \subseteq \text{const}\ \tau$ (cf.\ dual notation as negative qualifier ``writable'' / consider \textsc{const} as ``read-only'' / rewrite as ``ConstInt'' $\geq$ ``NormalInt'' class hierarchy)}
+  \item\emph{Q:} ``Subset contradiction'' wrt.\ $\tau \subseteq \text{const}\ \tau$ (cf.\ dual notation as negative qualifier ``writable'' / consider \textsc{const} as ``read-only'' / rewrite as ``ConstInt'' $\geq$ ``NormalInt'' class hierarchy)\\
+``WritableInt'' $\preceq$ ``NormalInt''}
 
 
 \begin{frame}{Qualified types}
