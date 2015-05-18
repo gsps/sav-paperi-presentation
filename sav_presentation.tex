@@ -9,6 +9,12 @@
 \usepackage[T1]{fontenc}
 % \usepackage[ngerman]{babel}
 
+\usepackage{multicol}
+\usepackage{prooftree}
+\usepackage{bcprules}
+\usepackage{scalefnt}
+\usepackage{adjustbox}
+
 \title{\\\emph{A Theory of Type Qualifiers}\\ 
 \small{}Jeffrey S. Foster, Manuel Fähndrich, Alexander Aiken\\
 PLDI 1999}
@@ -23,6 +29,9 @@ PLDI 1999}
 \usepackage{todonotes}
 \let\todox\todo
 \renewcommand\todo[1]{\todox[inline]{#1}}
+
+% Turnstile
+\newcommand{\ts}{\,\vdash\,}
 
 \begin{document}
 \maketitle
@@ -257,6 +266,316 @@ const int *id2(const int *x) { return x; }
   %   \end{center}
   %   are sound.
   \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%% SECTION 3 & 4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}{Type Inference and Qualifier Polymorphism}
+Outline
+\begin{enumerate}
+\item Forget about qualifiers\\
+Discuss type inference on simply typed lambda calculus
+\item Add qualifiers
+\item Add polymorphism
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Step 1: Forget about qualifiers}
+
+\infrule[Int]
+{}
+{A \ts n : int}
+
+\infrule[Var]
+{}
+{A \ts x : A(x)}
+
+\infrule[Lam]
+{A[x \rightarrow \tau_1] \ts e : \tau_2}
+{A \ts \lambda x . e : \tau_1 \rightarrow \tau_2}
+
+\infrule[App]
+{A \ts e_1 : \tau_2 \rightarrow \tau ~~~~ A \ts e_2 : \tau_2}
+{A \ts e_1 e_2 : \tau}
+
+\infrule[If]
+{A \ts e_1 : int ~~~~ A \ts e_2 : \tau ~~~ A \ts e_3 : \tau}
+{A \ts \text{\textbf{if }} e_1 \text{\textbf{ then }} e_2 \text{\textbf{ else }} e_3 \text{\textbf{ fi}} : \tau}
+
+\infrule[Let]
+{A \ts e_1 : \tau_1 ~~~~ A[x \rightarrow \tau_1] \ts e_2 : \tau_2}
+{A \ts \text{\textbf{let }} x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ ni}} : \tau_2}
+
+\end{frame}
+
+\begin{frame}{The Problem}
+
+Say we want to typecheck $\lambda x . <\text{some expression}>$.
+
+Use
+
+\infrule[Lam]
+{A[x \rightarrow \tau_1] \ts e : \tau_2}
+{A \ts \lambda x . e : \tau_1 \rightarrow \tau_2}
+
+but what $\tau_1$ should we put into $A$?
+
+\end{frame}
+
+\begin{frame}{Solutions}
+
+\begin{itemize}
+\item Require users to write argument type\\
+      $\lambda (x: \tau_1). e$ instead of $\lambda x . e$
+\item Local type inference using \emph{expected types} (e.g. Scala)
+      \texttt{List(1, 2, 3).map(x => x+1)}
+\item Global type inference (e.g. ML)\\
+  \textbf{let} $f = \lambda x . x + 1$ \textbf{in}\\
+  $\dots$\\
+  $myList.map(f)$\\
+  $\dots$\\
+  $otherList.map(f)$
+\end{itemize}
+
+\medskip
+
+$\Longrightarrow$ Study \emph{Constraint-Based Typing}
+
+\end{frame}
+
+\begin{frame}{Constraint-Based Typing}
+
+Approach:
+\begin{enumerate}
+\item Typecheck using the inference rules\\
+      Whenever we don't know what type to choose, pick a fresh type variable $\alpha$ and record the constraints it has to satisfy
+\item Unify the constraints
+\end{enumerate}
+
+\bigskip
+
+Constraints = set of equality constraints:
+
+%$C = \{ \tau_1 = \tau_1', ~ \tau_2 = \tau_2',~ \dots \}$
+\includegraphics[scale=0.75]{paper_constraint_grammar.png}
+
+\bigskip
+
+New typing judgment:
+
+%$A \ts e : \tau ; C$
+\includegraphics[scale=0.75]{paper_constraint_judgment.png}
+
+``In environment $A$, $e$ has type $\tau$ for all solutions of constraints $C$''
+
+\end{frame}
+
+\begin{frame}{Constraint-Based Typing Rules}
+
+\infrule[Int]
+{}
+{A \ts n : int; \emptyset}
+
+\infrule[Var]
+{}
+{A \ts x : A(x); \emptyset}
+
+\infrule[Lam]
+{\alpha \text{ fresh} ~~~~ A[x \rightarrow \alpha] \ts e : \tau_2 ; C}
+{A \ts \lambda x . e : \alpha \rightarrow \tau_2 ; C}
+
+\infrule[App]
+{\alpha \text{ fresh} ~~~~ A \ts e_1 : \tau_1 ; C_1 ~~~~ A \ts e_2 : \tau_2 ; C_2}
+{A \ts e_1 e_2 : \alpha ; C_1 \cup C_2 \cup \{ \tau_1 = (\tau_2 \rightarrow \alpha) \}}
+
+\infrule[If]
+{A \ts e_1 : \tau_1; C_1 ~~~~ A \ts e_2 : \tau_2; C_2 ~~~ A \ts e_3 : \tau_3; C_3}
+{A \ts \text{\textbf{if }} e_1 \text{\textbf{ then }} e_2 \text{\textbf{ else }} e_3 \text{\textbf{ fi}} : \tau_2;\\
+ C_1 \cup C_2 \cup C_3 \cup \{\tau_1 = int\} \cup \{\tau_2 = \tau_3\}}
+
+\infrule[Let]
+{A \ts e_1 : \tau_1; C_1 ~~~~ A[x \rightarrow \tau_1] \ts e_2 : \tau_2; C_2}
+{A \ts \text{\textbf{let }} x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ ni}} : \tau_2; C_1 \cup C_2}
+
+\end{frame}
+
+\begin{frame}{Unification}
+
+Solution to a set of constraints $C$ is a substitution
+
+\includegraphics[scale=0.75]{paper_substitution_type.png}
+
+mapping type variables to types containing no type variables,
+
+such that all equalities in $SC$ hold.
+
+\bigskip
+
+Goal of unification: Given $C$, find $S$.
+
+\end{frame}
+
+\begin{frame}{Unification Algorithm}
+
+\begin{small}
+
+\textbf{def} unify$(C) = C$ \textbf{match} $\{$ \\
+$~~$ \textbf{case} $\emptyset \Rightarrow$ identity   \textit{// empty substitution}\\
+$~~$ \textbf{case} $c_1 \cup C_{rest} \Rightarrow c_1 $ \textbf{match} $\{$\\
+$~~$ $~~$ \textbf{case} $((\tau_1 \rightarrow \tau_2) = (\tau_3 \rightarrow \tau_4)) \Rightarrow$ unify$(C_{rest} \cup \{\tau_1 = \tau_3\} \cup \{\tau_2 = \tau_4\})$\\
+$~~$ $~~$ \textbf{case} $(\tau = \tau) \Rightarrow$ unify$(C_{rest})$\\
+$~~$ $~~$ \textbf{case} $(\tau = \alpha)$ \textbf{if} $\alpha \notin FV(\tau) \Rightarrow$ unify$([\alpha \rightarrow \tau]C_{rest}) \circ [\alpha \rightarrow \tau]$\\
+$~~$ $~~$ \textbf{case} $(\alpha = \tau)$ \textbf{if} $\alpha \notin FV(\tau) \Rightarrow$ unify$([\alpha \rightarrow \tau]C_{rest}) \circ [\alpha \rightarrow \tau]$\\
+$~~$ $~~$ \textbf{case} \_ $\Rightarrow$ fail\\
+$~~$ $\}$\\
+$\}$
+
+\end{small}
+
+\end{frame}
+
+
+\begin{frame}{Step 2: Add qualifiers}
+
+\begin{tabular}{l | l}
+Without qualifiers & With qualifiers \\
+\hline
+\includegraphics[scale=0.7]{paper_constraint_judgment.png} & \includegraphics[scale=0.55]{paper_constraint_judgment_qualifs.png}\\
+\hline  
+\includegraphics[scale=0.55]{paper_figure_1_tau.png} & \includegraphics[scale=0.55]{paper_figure_3_no_label.png} \\
+\hline
+\includegraphics[scale=0.7]{paper_constraint_grammar.png} & \includegraphics[scale=0.55]{paper_constraint_grammar_qualifs.png}\\
+\hline
+\end{tabular}
+
+\bigskip
+\pause
+
+\textit{Q:} Why is there no $\rho_1 = \rho_2$ in the grammar for $C$?
+
+\pause
+
+\textit{A:} Because we can just use $\{\rho_1 \preceq \rho_2\} \cup \{\rho_2 \preceq \rho_1 \}$ instead.
+
+\end{frame}
+
+\begin{frame}{Constraint-Based Typing Rules With Qualifiers}
+
+\infrule[Int]
+{}
+{A \ts n : int; \emptyset}
+
+\infrule[Var]
+{}
+{A \ts x : A(x); \emptyset}
+
+\infrule[Lam]
+{\alpha \text{ fresh} ~~~~ \kappa \text{ fresh} ~~~~ A[x \rightarrow \kappa\alpha] \ts e : \rho_2 ; C}
+{A \ts \lambda x . e : \kappa\alpha \rightarrow \tau_2 ; C}
+
+\infrule[App]
+{\alpha \text{ fresh} ~~~~ \kappa, \kappa' \text{ fresh} ~~~~ A \ts e_1 : \rho_1 ; C_1 ~~~~ A \ts e_2 : \rho_2 ; C_2}
+{A \ts e_1 e_2 : \alpha ; C_1 \cup C_2 \cup \{ \rho_1 = \kappa(\rho_2 \rightarrow \kappa'\alpha) \}}
+
+\infrule[If]
+{\kappa \text{ fresh} ~~~~ A \ts e_1 : \rho_1; C_1 ~~~~ A \ts e_2 : \rho_2; C_2 ~~~ A \ts e_3 : \rho_3; C_3}
+{A \ts \text{\textbf{if }} e_1 \text{\textbf{ then }} e_2 \text{\textbf{ else }} e_3 \text{\textbf{ fi}} : \rho_2;\\
+ C_1 \cup C_2 \cup C_3 \cup \{\rho_1 = \kappa int\} \cup \{\rho_2 = \rho_3\}}
+
+\infrule[Let]
+{A \ts e_1 : \rho_1; C_1 ~~~~ A[x \rightarrow \rho_1] \ts e_2 : \rho_2; C_2}
+{A \ts \text{\textbf{let }} x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ ni}} : \rho_2; C_1 \cup C_2}
+
+\end{frame}
+
+\begin{frame}{Question}
+
+In an if-expression, what if the then-branch has type \texttt{const int} and the else-branch has type \texttt{int}: Can we still typecheck the expression?
+
+(If) rule from previous slide:
+
+\infrule[]
+{\kappa \text{ fresh} ~~~~ A \ts e_1 : \rho_1; C_1 ~~~~ A \ts e_2 : \rho_2; C_2 ~~~ A \ts e_3 : \rho_3; C_3}
+{A \ts \text{\textbf{if }} e_1 \text{\textbf{ then }} e_2 \text{\textbf{ else }} e_3 \text{\textbf{ fi}} : \rho_2;\\
+ C_1 \cup C_2 \cup C_3 \cup \{\rho_1 = \kappa int\} \cup \{ \rho_2 = \rho_3\}}
+
+\pause
+
+A better version:
+
+\infrule[]
+{\alpha, \kappa, \kappa' \text{ fresh} ~~~~ A \ts e_1 : \rho_1; C_1 ~~~~ A \ts e_2 : \rho_2; C_2 ~~~ A \ts e_3 : \rho_3; C_3}
+{A \ts \text{\textbf{if }} e_1 \text{\textbf{ then }} e_2 \text{\textbf{ else }} e_3 \text{\textbf{ fi}} : \kappa'\alpha;\\
+ C_1 \cup C_2 \cup C_3 \cup \{\rho_1 = \kappa int\} \cup \{ \rho_2 \preceq \kappa'\alpha \} \cup \{ \rho_3 \preceq \kappa'\alpha \}}
+
+\end{frame}
+
+\begin{frame}{Unification Algorithm}
+
+Reminder:\\ \includegraphics[scale=0.55]{paper_constraint_grammar_qualifs.png}
+
+\bigskip
+
+First phase: Repeat
+\begin{itemize}
+\item $\{(Q_1\tau_1 \rightarrow Q_2\tau_2) \preceq (Q_3\tau_3 \rightarrow Q_4\tau_4)\} \cup C_{rest}$ \\
+$\Rightarrow C_{rest} \cup \{Q_3\tau_3 \preceq Q_1\tau_1\} \cup \{ Q_2\tau_2 \preceq Q_4\tau_4\})$
+\item $\{Q\tau \preceq Q'\tau\} \cup C_{rest} ~~\Rightarrow~~ C_{rest} \cup \{ Q \sqsubseteq Q'\}$
+\item $\{Q\tau \preceq Q'\alpha\} \cup C_{rest} ~~\Rightarrow~~ [\alpha \rightarrow \tau]C_{rest} \cup \{Q \sqsubseteq Q'\}$
+\item $\{Q\alpha \preceq Q'\tau\} \cup C_{rest} ~~\Rightarrow~~ [\alpha \rightarrow \tau]C_{rest} \cup \{Q \sqsubseteq Q'\}$
+\end{itemize}
+until only lattice constrains are left.
+
+Second phase:
+\begin{itemize}
+\item All constrains now are of the form $\kappa \sqsubseteq L$, $L \sqsubseteq \kappa$, or $L_1 \sqsubseteq L_2$.\\
+Solve in linear time as described in [HR97].
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Test Page}%%%%%%%%%%%%%%%%
+
+\begin{adjustbox}{width=0.3\textwidth}
+
+Example: \textsc{invert-var}:
+
+ \prooftree
+	\prooftree
+	   \dots
+	\justifies
+	    \Gamma \ts x : T' ~~
+	\endprooftree
+	\prooftree
+	   \dots
+	\justifies
+	   \Gamma \ts T' <: T
+	\endprooftree
+\justifies
+	\Gamma \ts x : T
+\endprooftree
+\end{adjustbox}
+
+Example: \textsc{invert-var}:
+
+ \prooftree
+	\prooftree
+	   \dots
+	\justifies
+	    \Gamma \ts x : T' ~~
+	\endprooftree
+	\prooftree
+	   \dots
+	\justifies
+	   \Gamma \ts T' <: T
+	\endprooftree
+\justifies
+	\Gamma \ts x : T
+\endprooftree
+
 \end{frame}
 
 
