@@ -39,8 +39,9 @@ PLDI 1999}
 
 \begin{frame}{Overview}
   \begin{itemize}
-  \item Many languages support a range of \emph{type qualifiers} -- they enable a simple, yet useful form of subtyping.
-      \todo{Give concrete examples of qualifiers}
+  \item Many languages support a range of \emph{type qualifiers} -- 
+    they enable a simple, yet useful form of subtyping.\\
+    \begin{itemize}\item E.g.\ \textsc{const} on references, \textsc{nonzero} on integers.\end{itemize}
 
   \item Authors present a framework for adding type qualifiers to $\lambda$-calculi.
 
@@ -62,47 +63,138 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}[fragile]{Motivation}
   \begin{itemize}
-  \item Paper's presentation is closely tied to \textsc{const} qualifier in C
+  \item Paper's presentation is closely tied to \textsc{const} qualifier in C.
+    \begin{itemize}\item What are the semantics of \textsc{const} in C?\end{itemize}
 
-  \item[$\Rightarrow$] Use-case: Analyze C sources and infer additional \textsc{const} qualifiers
+  \item<2-> Use-case: Analyze C sources and infer additional \textsc{const} qualifiers
 
-  \item<2->
+  \item<3->
     This rectifies one particular peculiarity of C's type system:
     % \vspace{1em}
     \lstcduplicateprocs
     $\rightarrow$ Inference of \textsc{const} qualifiers removes need for multiple versions of same procedure
-    \todo{Replace with better example? No, keep it simple here for the overview, better example is too long and will be presented in second part}
   \end{itemize}
 \end{frame}
 
-\note[itemize]{%
-  \item\emph{Q:} What does \textsc{const} in C mean?
-  \todo{Will we show this to students? Why as notes?}}
 
+% \begin{frame}{Preliminaries}{Basic syntax / notation / definitions}
+%   \begin{itemize}
+%   \item type constructor, $\mathit{Typ}$ (paper\_typ.png), type environment
+%   \item framework allows mapping of source lang to lang with qualifiers; paper's source language (paper\_sourcelang)
+%   \item qualifiers, pos./neg. (paper\_negposqualifier), negation of a qualifier
+%   \item qualifier lattice (paper\_qualifierlattice\_\{def,sample\})
+%   \item intuition on qualifier lattice: losing ``information''/capabilites as we move up the lattice
+%   \end{itemize}
+%   \todo{Split into multiple slides and expand}
+% \end{frame}
 
-\begin{frame}{Preliminaries}{Basic syntax / notation / definitions}
+% \note[itemize]{%
+%   \item\emph{Q:} What is a two-point lattice?\\
+%   \item\emph{Q:} What is $\bot$ of this lattice? What is $\top$?\\
+%   \item\emph{Q:} ``Subset contradiction'' wrt.\ $\tau \subseteq \text{const}\ \tau$ (cf.\ dual notation as negative qualifier ``writable'' / consider \textsc{const} as ``read-only'' / rewrite as ``ConstInt'' $\geq$ ``NormalInt'' class hierarchy)\\
+% ``WritableInt'' $\preceq$ ``NormalInt''}
+
+\begin{frame}{Preliminaries}{Qualifiers}
+  %
+  \begin{center}\includegraphics[scale=0.25]{paper_qualifier_def.png}\end{center}
   \begin{itemize}
-  \item type constructor, $\mathit{Typ}$ (paper\_typ.png), type environment
-  \item framework allows mapping of source lang to lang with qualifiers; paper's source language (paper\_sourcelang)
-  \item qualifiers, pos./neg. (paper\_negposqualifier), negation of a qualifier
-  \item qualifier lattice (paper\_qualifierlattice\_\{def,sample\})
-  \item intuition on qualifier lattice: losing ``information''/capabilites as we move up the lattice
+  \item E.g. \textsc{const} is a positive qualifier, while
+    \textsc{nonzero} is negative.
   \end{itemize}
-  \todo{Split into multiple slides and expand}
+
+  \bigskip
+
+  \visible<2->{
+  \begin{center}\includegraphics[scale=0.36]{paper_qualifierlattice_def.png}\end{center}
+  \begin{itemize}
+  \item[$\Rightarrow$] Question: What is a two-point lattice?
+  % Answered verbally
+  \end{itemize}
+  }
 \end{frame}
 
-\note[itemize]{%
-  \item\emph{Q:} What is a two-point lattice?\\
-  \item\emph{Q:} What is $\bot$ of this lattice? What is $\top$?\\
-  \item\emph{Q:} ``Subset contradiction'' wrt.\ $\tau \subseteq \text{const}\ \tau$ (cf.\ dual notation as negative qualifier ``writable'' / consider \textsc{const} as ``read-only'' / rewrite as ``ConstInt'' $\geq$ ``NormalInt'' class hierarchy)\\
-``WritableInt'' $\preceq$ ``NormalInt''}
+\begin{frame}{Preliminaries}{Qualifiers (2)}
+  \begin{itemize}
+  \item Let's look at the lattice of positive qualifiers \textsc{const}, \textsc{dynamic} and (negative) \textsc{nonzero}: 
+    \begin{center}\includegraphics[scale=0.25]{paper_qualifierlattice_sample.png}\end{center}
+  \item<2-> Question: What is the $\bot$ of this lattice? What is $\top$?\\
+    \visible<3->{Answer: $\bot = \text{``nonzero''}, \top = \text{``const dynamic''}$}
+  \end{itemize}
+  \todo{Intuition on qualifier lattice}
+  \todo{``Subset contradiction''}
+\end{frame}
+
+\begin{frame}{Preliminaries}{Qualifiers (3)}
+  \begin{itemize}
+  \item With each qualifier $q_i$ we associate a qualifier lattice element $\neg q_i$, where
+    \begin{itemize}
+    \item[] $\neg q_i := (\top_1, \dots, \bot_i, \dots, \top_n)$ when $q_i$ is \emph{positive}, and
+    \item[] $\neg q_i := (\bot_1, \dots, \top_i, \dots, \bot_n)$ when $q_i$ is \emph{negative}.
+    \end{itemize}
+  \item<2-> Question: What is $\neg nonzero$?\\
+    \visible<3->{Answer: $(\bot_\text{const}, \bot_\text{dynamic}, \top_\text{nonzero}) = \text{\lq\lq}\emptyset\text{''}$}
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Preliminaries}{Qualifiers (2)}
+%   \begin{itemize}
+%   \item Let's look at the lattice of positive qualifiers \textsc{const}, \textsc{dynamic} and (negative) \textsc{nonzero}:
+%   \end{itemize}
+%   \begin{columns}[onlytextwidth]
+%   \begin{column}{0.5\textwidth}
+%     \centering
+%     \includegraphics[scale=0.20]{paper_qualifierlattice_sample.png}
+%   \end{column}
+%   \begin{column}{0.5\textwidth}
+%     \begin{itemize}
+%     \item<3->[$\Rightarrow$] Q: What is the $\bot$ of this lattice? What is $\top$?
+%     \item<4->[$\Rightarrow$] Q: What is $\neg nonzero$?
+%       \visible<5-> $(\text{const}, \text{dynamic}, \top_\text{nonzero}) = \text{``const dynamic''}$
+%     \end{itemize}
+%   \end{column}
+%   \end{columns}
+%   \begin{itemize}
+%   \item<2-> With each qualifier $q_i$ we associate a qualifier lattice element $\neg q_i$, where
+%       \begin{itemize}
+%       \item[] $\neg q_i := (\top_1, \dots, \bot_i, \dots, \top_n)$ when $q_i$ is \emph{positive}, and
+%       \item[] $\neg q_i := (\bot_1, \dots, \top_i, \dots, \bot_n)$ when $q_i$ is \emph{negative}.
+%       \end{itemize}
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}{Preliminaries}{Source language}
+  Framework extends a given source language, e.g.\
+  \begin{itemize}
+  \item Types over set of \emph{type constructors} $c \in \Sigma$ and \emph{type variables} $\alpha$:
+    \begin{center}\includegraphics[scale=0.25]{paper_typ.png}\end{center}
+  \item Expressions of $\lambda$-calculus with \textsc{if} and \textsc{let}:
+    \begin{center}\includegraphics[scale=0.25]{paper_sourcelang.png}\end{center}
+  \end{itemize}
+\end{frame}
+
+% \begin{frame}{Preliminaries}{Source language}
+%   \begin{columns}[onlytextwidth]
+%   \begin{column}{0.5\textwidth}
+%     \centering
+%     %
+%   \end{column}
+%   \begin{column}{0.5\textwidth}
+%     %
+%   \end{column}
+% ​  \end{columns}
+% \end{frame}
 
 
 \begin{frame}{Qualified types}
-  \begin{itemize}
-  \item $\mathit{QTyp}$ (paper\_qtyp), resulting concrete types wrt.\ sample lang
-  \item subtyping rules (paper\_samplelang\_subtypingrules)
-  \end{itemize}
+  Pairing ordinary types with elements of the qualifier lattice yields \emph{qualified types}:
+  \begin{center}\includegraphics[scale=0.25]{paper_qtyp.png}\end{center}
+\end{frame}
+
+\begin{frame}{Qualified types (2)}
+  Given our sample source language, we get types of the form
+  \begin{center}\includegraphics[scale=0.38]{paper_qualifiedtypegrammar.png}\end{center}
+  along with a pair of subtyping rules that naturally connects the type system to our qualifier lattice:
+  \begin{center}\includegraphics[scale=0.30]{paper_samplelang_subtypingrules.png}\end{center}
 \end{frame}
 
 
@@ -230,7 +322,6 @@ const int *id2(const int *x) { return x; }
     \>\#4: \>$A[x, y \mapsto \bot\,\text{ref nonzero int}]\,\vdash\ !x : \text{nonzero int}$ \>\small(unchanged)
     \end{tabbing}
     \end{minipage}
-    \todo{Should introduce qualifier negation for this.}
   \end{itemize}
 \end{frame}
 
@@ -564,6 +655,7 @@ Note: The goal is to be polymorphic in \emph{qualifiers}, not in \emph{types}.
 \bigskip
 
 \begin{center}
+\renewcommand{\arraystretch}{1.5}
 \begin{tabular}{c | c}
 Without polymorphism & With polymorphism \\
 \hline
@@ -574,6 +666,7 @@ $A$ contains $(x, \rho)$ tuples & $A$ contains $(x, \sigma)$ tuples\\
 \includegraphics[scale=0.65]{paper_figure_3_no_label.png} & \includegraphics[scale=0.65]{paper_poly_types_grammar.png} \\
 \hline
 \end{tabular}
+\renewcommand{\arraystretch}{1.0}
 \end{center}
 
 \bigskip
