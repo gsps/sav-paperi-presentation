@@ -70,7 +70,7 @@ const int *id2(const int *x) { return x; }
     % \vspace{1em}
     \lstcduplicateprocs
     $\rightarrow$ Inference of \textsc{const} qualifiers removes need for multiple versions of same procedure
-    \todo{Replace with better example?}
+    \todo{Replace with better example? No, keep it simple here for the overview, better example is too long and will be presented in second part}
   \end{itemize}
 \end{frame}
 
@@ -536,47 +536,92 @@ Solve in linear time as described in [HR97].
 
 \end{frame}
 
+\begin{frame}{Step 3: Add Polymorphism}
 
-\begin{frame}{Test Page}%%%%%%%%%%%%%%%%
+Note: The goal is to be polymorphic in \emph{qualifiers}, not in \emph{types}.
 
-\begin{adjustbox}{width=0.3\textwidth}
+\bigskip
 
-Example: \textsc{invert-var}:
+\begin{tabular}{l | l}
+Without polymorphism & With polymorphism \\
+\hline
+$A$ contains $(x, \rho)$ tuples & $A$ contains $(x, \sigma)$ tuples\\
+\hline
+\includegraphics[scale=0.55]{paper_constraint_judgment_qualifs.png} & \includegraphics[scale=0.55]{paper_constraint_judgment_qualifs.png}\\
+\hline  
+\includegraphics[scale=0.55]{paper_figure_3_no_label.png} & \includegraphics[scale=0.55]{paper_poly_types_grammar.png} \\
+\hline
+\end{tabular}
 
- \prooftree
-	\prooftree
-	   \dots
-	\justifies
-	    \Gamma \ts x : T' ~~
-	\endprooftree
-	\prooftree
-	   \dots
-	\justifies
-	   \Gamma \ts T' <: T
-	\endprooftree
-\justifies
-	\Gamma \ts x : T
-\endprooftree
-\end{adjustbox}
+\bigskip
 
-Example: \textsc{invert-var}:
-
- \prooftree
-	\prooftree
-	   \dots
-	\justifies
-	    \Gamma \ts x : T' ~~
-	\endprooftree
-	\prooftree
-	   \dots
-	\justifies
-	   \Gamma \ts T' <: T
-	\endprooftree
-\justifies
-	\Gamma \ts x : T
-\endprooftree
+$\sigma$: Type scheme carrying constraints
 
 \end{frame}
 
+\begin{frame}[fragile]{Back to C: Example}
+
+\begin{scriptsize}
+\begin{lstlisting}[language=C,frame=none,belowskip=- \medskipamount]
+const int * max_const(const int * p1, const int * p2) {
+   if (*p1 < *p2) {
+      return p2;
+   } else {
+      return p1;
+   }
+}
+
+int * max_nonconst(int * p1, int * p2) { EXACTLY THE SAME BODY }
+
+int main() {
+   int v1 = 8;
+   int v2 = 5;
+
+   const int * p1_const = &v1;
+   const int * p2_const = &v2;
+   int bigger = *(max_const(p1_const, p2_const));
+   printf("%d\n", bigger);
+   
+   int * p1_nonconst = &v1;
+   int * p2_nonconst = &v2;
+   int * p_bigger = max_nonconst(p1_nonconst, p2_nonconst);
+   (*p_bigger)--;
+}
+\end{lstlisting}
+\end{scriptsize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Qualifier Polymorphism}
+
+In C:
+
+\begin{scriptsize}
+\begin{lstlisting}[language=C,frame=none,belowskip=- \medskipamount]
+const int * max_const(const int * p1, const int * p2)
+
+int * max_nonconst(int * p1, int * p2)
+\end{lstlisting}
+\end{scriptsize}
+
+\bigskip
+
+Translated to the language of the paper:
+
+\begin{scriptsize}
+max\_const : $(\text{\textbf{const }} ref(\bot int)) \rightarrow (\text{\textbf{const }} ref(\bot int)) \rightarrow (\text{\textbf{const }} ref(\bot int))$
+
+max\_nonconst : $(\bot ref(\bot int)) \rightarrow (\bot ref(\bot int)) \rightarrow (\bot ref(\bot int))$
+\end{scriptsize}
+
+\bigskip
+
+Now with qualifier polymorphism:
+
+\begin{scriptsize}
+max: $\forall \kappa . (\kappa ref(\bot int)) \rightarrow (\kappa ref(\bot int)) \rightarrow (\kappa ref(\bot int)) \textbackslash \emptyset$
+\end{scriptsize}
+
+\end{frame}
 
 \end{document}
