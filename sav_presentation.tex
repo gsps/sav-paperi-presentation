@@ -4,7 +4,6 @@
 \setbeamertemplate{footline}[frame number]
 \setbeamertemplate{navigation symbols}{}
 
-
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 % \usepackage[ngerman]{babel}
@@ -15,12 +14,6 @@
 \usepackage{scalefnt}
 \usepackage{adjustbox}
 \usepackage{wasysym}
-
-\title{\\\emph{A Theory of Type Qualifiers}\\ 
-\small{}Jeffrey S. Foster, Manuel Fähndrich, Alexander Aiken\\
-PLDI 1999}
-\author{Paper presentation by\\Georg Schmid and Samuel Grütter}
-\date{May 20, 2015}
 
 \usepackage{amssymb}
 \usepackage{parskip}
@@ -33,6 +26,13 @@ PLDI 1999}
 
 % Turnstile
 \newcommand{\ts}{\,\vdash\,}
+
+
+\title{\\\emph{A Theory of Type Qualifiers}\\ 
+\small{}Jeffrey S. Foster, Manuel Fähndrich, Alexander Aiken\\
+PLDI 1999}
+\author{Paper presentation by\\Georg Schmid and Samuel Grütter}
+\date{May 20, 2015}
 
 \begin{document}
 \maketitle
@@ -236,7 +236,7 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}{Qualifier semantics}{\textsc{const} example (3)}
   \begin{itemize}
-  \item Requiring refs' argument type to be invariant, fixes our problem.
+  \item Requiring refs' argument type to be invariant fixes our problem.
     \begin{center}
     \includegraphics[scale=0.29]{paper_ref_sound.png}
     \end{center}
@@ -277,6 +277,7 @@ Outline
 \begin{enumerate}
 \item Forget about qualifiers\\
 Discuss type inference on simply typed lambda calculus
+\todo{This looks like a mental note to the speaker}
 \item Add qualifiers
 \item Add polymorphism
 \end{enumerate}
@@ -310,7 +311,7 @@ Discuss type inference on simply typed lambda calculus
 
 \end{frame}
 
-\begin{frame}{The Problem}
+\begin{frame}{The problem}
 
 Say we want to typecheck $\lambda x . <\text{some expression}>$.
 
@@ -327,16 +328,18 @@ but what $\tau_1$ should we put into $A$?
 \begin{frame}{Solutions}
 
 \begin{itemize}
-\item Require users to write argument type\\
+\item Require users to \textbf{explicitly state argument type}\\
       $\lambda (x: \tau_1). e$ instead of $\lambda x . e$
-\item Local type inference using \emph{expected types} (e.g. Scala)
+\item \textbf{Local type inference} using \emph{expected types} (e.g. Scala)
       \texttt{List(1, 2, 3).map(x => x+1)}
-\item Global type inference (e.g. ML)\\
-  \textbf{let} $f = \lambda x . x + 1$ \textbf{in}\\
-  $\dots$\\
-  $myList.map(f)$\\
-  $\dots$\\
-  $otherList.map(f)$
+\item \textbf{Global type inference} (e.g. ML)\\
+  \quad\begin{minipage}[t]{0.3\textwidth}
+    \textbf{let} $f = \lambda x .\ x + 1$ \textbf{in}\\
+    $\dots$\\
+    $myList.map(f)$\\
+    $\dots$\\
+    $otherList.map(f)$
+  \end{minipage}
 \end{itemize}
 
 \medskip
@@ -350,7 +353,7 @@ $\Longrightarrow$ Study \emph{Constraint-Based Typing}
 Approach:
 \begin{enumerate}
 \item Typecheck using the inference rules\\
-      Whenever we don't know what type to choose, pick a fresh type variable $\alpha$ and record the constraints it has to satisfy
+      Whenever we don't know what type to choose, pick a fresh type variable $\alpha$ and record the constraints it has to satisfy.
 \item Unify the constraints
 \end{enumerate}
 
@@ -358,15 +361,19 @@ Approach:
 
 Constraints = set of equality constraints:
 
+\begin{center}
 %$C = \{ \tau_1 = \tau_1', ~ \tau_2 = \tau_2',~ \dots \}$
 \includegraphics[scale=0.75]{paper_constraint_grammar.png}
+\end{center}
 
 \bigskip
 
 New typing judgment:
 
+\begin{center}
 %$A \ts e : \tau ; C$
-\includegraphics[scale=0.75]{paper_constraint_judgment.png}
+\includegraphics[scale=0.80]{paper_constraint_judgment.png}
+\end{center}
 
 ``In environment $A$, $e$ has type $\tau$ for all solutions of constraints $C$''
 
@@ -402,19 +409,23 @@ New typing judgment:
 \end{frame}
 
 \begin{frame}{Unification}
+\begin{itemize}
 
-Solution to a set of constraints $C$ is a substitution
+\item A solution to a set of constraints $C$ is a substitution
 
+\begin{center}
 \includegraphics[scale=0.75]{paper_substitution_type.png}
+\end{center}
+\vspace{-0.5em}
 
 mapping type variables to types containing no type variables,
-
 such that all equalities in $SC$ hold.
 
-\bigskip
+% \bigskip
 
-Goal of unification: Given $C$, find $S$.
+\item[$\Rightarrow$] Goal of unification: Given $C$, find $S$.
 
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Unification Algorithm}
@@ -439,8 +450,10 @@ $\}$
 
 \begin{frame}{Step 2: Add qualifiers}
 
-\begin{tabular}{l | l}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{c | c}
 Without qualifiers & With qualifiers \\
+\hline
 \hline
 \includegraphics[scale=0.7]{paper_constraint_judgment.png} & \includegraphics[scale=0.55]{paper_constraint_judgment_qualifs.png}\\
 \hline  
@@ -449,6 +462,7 @@ Without qualifiers & With qualifiers \\
 \includegraphics[scale=0.7]{paper_constraint_grammar.png} & \includegraphics[scale=0.55]{paper_constraint_grammar_qualifs.png}\\
 \hline
 \end{tabular}
+\renewcommand{\arraystretch}{1.0}
 
 \bigskip
 \pause
@@ -494,7 +508,8 @@ Without qualifiers & With qualifiers \\
 
 In an if-expression, what if the then-branch has type \texttt{const int} and the else-branch has type \texttt{int}: Can we still typecheck the expression?
 
-(If) rule from previous slide:
+\begin{itemize}
+\item (If) rule from previous slide:
 
 \infrule[]
 {\kappa \text{ fresh} ~~~~ A \ts e_1 : \rho_1; C_1 ~~~~ A \ts e_2 : \rho_2; C_2 ~~~ A \ts e_3 : \rho_3; C_3}
@@ -503,22 +518,27 @@ In an if-expression, what if the then-branch has type \texttt{const int} and the
 
 \pause
 
-A better version:
+\item A better version:
 
 \infrule[]
 {\alpha, \kappa, \kappa' \text{ fresh} ~~~~ A \ts e_1 : \rho_1; C_1 ~~~~ A \ts e_2 : \rho_2; C_2 ~~~ A \ts e_3 : \rho_3; C_3}
 {A \ts \text{\textbf{if }} e_1 \text{\textbf{ then }} e_2 \text{\textbf{ else }} e_3 \text{\textbf{ fi}} : \kappa'\alpha;\\
  C_1 \cup C_2 \cup C_3 \cup \{\rho_1 = \kappa int\} \cup \{ \rho_2 \preceq \kappa'\alpha \} \cup \{ \rho_3 \preceq \kappa'\alpha \}}
+\end{itemize}
 
 \end{frame}
 
 \begin{frame}{Unification Algorithm}
+\begin{itemize}
 
-Reminder:\\ \includegraphics[scale=0.55]{paper_constraint_grammar_qualifs.png}
+\item Reminder:
+\begin{center}
+\includegraphics[scale=0.65]{paper_constraint_grammar_qualifs.png}
+\end{center}
 
-\bigskip
+% \bigskip
 
-First phase: Repeat
+\item \textbf{First phase:} Repeat
 \begin{itemize}
 \item $\{(Q_1\tau_1 \rightarrow Q_2\tau_2) \preceq (Q_3\tau_3 \rightarrow Q_4\tau_4)\} \cup C_{rest}$ \\
 $\Rightarrow C_{rest} \cup \{Q_3\tau_3 \preceq Q_1\tau_1\} \cup \{ Q_2\tau_2 \preceq Q_4\tau_4\})$
@@ -528,13 +548,14 @@ $\Rightarrow C_{rest} \cup \{Q_3\tau_3 \preceq Q_1\tau_1\} \cup \{ Q_2\tau_2 \pr
 \end{itemize}
 until only lattice constrains are left.
 
-Second phase:
-\begin{itemize}
-\item All constrains now are of the form $\kappa \sqsubseteq L$, $L \sqsubseteq \kappa$, or $L_1 \sqsubseteq L_2$.\\
+\item \textbf{Second phase:}\\
+% \begin{itemize}
+% \item 
+All constrains now are of the form $\kappa \sqsubseteq L$, $L \sqsubseteq \kappa$, or $L_1 \sqsubseteq L_2$.\\
 Solve in linear time as described in [HR97].
+% \end{itemize}
+
 \end{itemize}
-
-
 \end{frame}
 
 \begin{frame}{Step 3: Add Polymorphism}
@@ -543,16 +564,20 @@ Note: The goal is to be polymorphic in \emph{qualifiers}, not in \emph{types}.
 
 \bigskip
 
-\begin{tabular}{l | l}
+\begin{center}
+\begin{tabular}{c | c}
 Without polymorphism & With polymorphism \\
+\hline
 \hline
 $A$ contains $(x, \rho)$ tuples & $A$ contains $(x, \sigma)$ tuples\\
 \hline
-\includegraphics[scale=0.55]{paper_constraint_judgment_qualifs.png} & \includegraphics[scale=0.55]{paper_constraint_judgment_qualifs.png}\\
+\includegraphics[scale=0.65]{paper_constraint_judgment_qualifs.png} & \includegraphics[scale=0.65]{paper_constraint_judgment_qualifs.png}\\
 \hline  
-\includegraphics[scale=0.55]{paper_figure_3_no_label.png} & \includegraphics[scale=0.55]{paper_poly_types_grammar.png} \\
+\includegraphics[scale=0.65]{paper_figure_3_no_label.png} & \includegraphics[scale=0.65]{paper_poly_types_grammar.png} \\
 \hline
 \end{tabular}
+\end{center}
+\todo{Still needs some reformatting}
 
 \bigskip
 
@@ -634,8 +659,9 @@ $\Longrightarrow$ Need to define evaluation rules
 \end{frame}
 
 \begin{frame}{Evaluation rules}
-\includegraphics[scale=0.6]{paper_figure_5.png}
-
+\begin{center}
+\includegraphics[scale=0.55]{paper_figure_5.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Soundness}
@@ -660,17 +686,16 @@ Answer:
 
 \includegraphics[scale=0.6]{paper_lemma_1.png}
 
-Question: What's the type of $S$?
+\begin{itemize}
+\item Question: What's the type of $S$?\\
+\visible<2->{Answer: $TVar \rightarrow Typ$}
 
-\onslide<2->{Answer: $TVar \rightarrow Typ$}
+\item Question: Why is $S$ not applied to $e$?\\
+\visible<3->{Answer: Because $e$ cannot contain type variables.}
 
-Question: Why is $S$ not applied to $e$?
-
-\onslide<3->{Answer: Because $e$ cannot contain type variables.}
-
-Question: Don't we need another substitution lemma?
-
-\onslide<4->{Answer: We also need a substitution lemma on the term level, to prove that if we step from $(\lambda x . e_1) v$ to $e_1[x \rightarrow v]$, the type is preserved.}
+\item Question: Don't we need another substitution lemma?\\
+\visible<4->{Answer: Yes, we also need a substitution lemma on the term level, to prove that if we step from $(\lambda x . e_1) v$ to $e_1[x \rightarrow v]$, the type is preserved.}
+\end{itemize}
 
 \end{frame}
 
@@ -678,7 +703,7 @@ Question: Don't we need another substitution lemma?
 
 \includegraphics[scale=0.6]{paper_corollary_1.png}
 
-Question: What does that mean? Isn't $(\lambda x.x)1$ a counterexample?
+Question: What does that mean? Isn't $(\lambda x.x)\,1$ a counterexample?
 
 % no answer because we don't know it
 
@@ -686,7 +711,9 @@ Question: What does that mean? Isn't $(\lambda x.x)1$ a counterexample?
 
 \begin{frame}{Benchmarks: Const Inference}
 
+\begin{center}
 \includegraphics[scale=0.5]{paper_figure_6.png}
+\end{center}
 
 Question: What's the meaning of Other/Poly/Mono/Declared?
 
