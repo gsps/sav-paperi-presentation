@@ -368,14 +368,14 @@ Constraints = set of equality constraints:
 
 \bigskip
 
-New typing judgment:
+New typing judgement:
 
 \begin{center}
 %$A \ts e : \tau ; C$
 \includegraphics[scale=0.80]{paper_constraint_judgment.png}
 \end{center}
 
-``In environment $A$, $e$ has type $\tau$ for all solutions of constraints $C$''
+``In environment $A$, $e$ has type $\tau$ for all solutions of constraints $C$.''
 
 \end{frame}
 
@@ -545,12 +545,12 @@ $\Rightarrow C_{rest} \cup \{Q_3\tau_3 \preceq Q_1\tau_1\} \cup \{ Q_2\tau_2 \pr
 \item $\{Q\tau \preceq Q'\alpha\} \cup C_{rest} ~~\Rightarrow~~ [\alpha \rightarrow \tau]C_{rest} \cup \{Q \sqsubseteq Q'\}$
 \item $\{Q\alpha \preceq Q'\tau\} \cup C_{rest} ~~\Rightarrow~~ [\alpha \rightarrow \tau]C_{rest} \cup \{Q \sqsubseteq Q'\}$
 \end{itemize}
-until only lattice constrains are left.
+until only lattice constraints are left.
 
 \item \textbf{Second phase:}\\
 % \begin{itemize}
 % \item 
-All constrains now are of the form $\kappa \sqsubseteq L$, $L \sqsubseteq \kappa$, or $L_1 \sqsubseteq L_2$.\\
+All constraints now are of the form $\kappa \sqsubseteq L$, $L \sqsubseteq \kappa$, or $L_1 \sqsubseteq L_2$.\\
 Solve in linear time as described in [HR97].
 % \end{itemize}
 
