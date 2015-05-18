@@ -14,6 +14,7 @@
 \usepackage{bcprules}
 \usepackage{scalefnt}
 \usepackage{adjustbox}
+\usepackage{wasysym}
 
 \title{\\\emph{A Theory of Type Qualifiers}\\ 
 \small{}Jeffrey S. Foster, Manuel Fähndrich, Alexander Aiken\\
@@ -623,5 +624,94 @@ max: $\forall \kappa . (\kappa ref(\bot int)) \rightarrow (\kappa ref(\bot int))
 \end{scriptsize}
 
 \end{frame}
+
+\begin{frame}{Soundness}
+
+Soundness = ``Nothing can go wrong during evaluation''
+
+$\Longrightarrow$ Need to define evaluation rules
+
+\end{frame}
+
+\begin{frame}{Evaluation rules}
+\includegraphics[scale=0.6]{paper_figure_5.png}
+
+\end{frame}
+
+\begin{frame}{Soundness}
+
+TAPL: ``Soundness = Progress + Preservation''
+
+Question: Where are these proofs in the paper?
+
+\pause
+
+Answer:
+\begin{itemize}
+\item Progress:\\
+\includegraphics[scale=0.6]{paper_progress.png}
+\item Preservation:\\
+\includegraphics[scale=0.6]{paper_preservation.png}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Helper lemmas for Subject Reduction}
+
+\includegraphics[scale=0.6]{paper_lemma_1.png}
+
+Question: What's the type of $S$?
+
+\onslide<2->{Answer: $TVar \rightarrow Typ$}
+
+Question: Why is $S$ not applied to $e$?
+
+\onslide<3->{Answer: Because $e$ cannot contain type variables.}
+
+Question: Don't we need another substitution lemma?
+
+\onslide<4->{Answer: We also need a substitution lemma on the term level, to prove that if we step from $(\lambda x . e_1) v$ to $e_1[x \rightarrow v]$, the type is preserved.}
+
+\end{frame}
+
+\begin{frame}{Soundness}
+
+\includegraphics[scale=0.6]{paper_corollary_1.png}
+
+Question: What does that mean? Isn't $(\lambda x.x)1$ a counterexample?
+
+% no answer because we don't know it
+
+\end{frame}
+
+\begin{frame}{Benchmarks: Const Inference}
+
+\includegraphics[scale=0.5]{paper_figure_6.png}
+
+Question: What's the meaning of Other/Poly/Mono/Declared?
+
+% give answer orally
+
+\end{frame}
+
+\begin{frame}{Discussion}
+
+Question: What's the goal of qualifier inference?\pause
+\begin{itemize}
+\item Rewrite C source automatically?
+\item More efficient program execution?
+\item Make C qualifier-polymorphic?
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\begin{Huge}
+\begin{center}
+Thank you \smiley
+\end{center}
+\end{Huge}
+\end{frame}
+
 
 \end{document}
