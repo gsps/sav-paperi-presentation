@@ -63,7 +63,7 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}[fragile]{Motivation}
   \begin{itemize}
-  \item Paper's presentation is closely tied to \textsc{const} qualifier in C.
+  \item Paper's presentation is closely tied to \textsc{const} qualifier in C
     \begin{itemize}\item What are the semantics of \textsc{const} in C?\end{itemize}
 
   \item<2-> Use-case: Analyze C sources and infer additional \textsc{const} qualifiers
@@ -108,7 +108,7 @@ const int *id2(const int *x) { return x; }
   \begin{center}\includegraphics[scale=0.36]{paper_qualifierlattice_def.png}\end{center}
   \begin{itemize}
   \item[$\Rightarrow$] Question: What is a two-point lattice?
-  % Answered verbally
+  % NOTE: Answered verbally
   \end{itemize}
   }
 \end{frame}
@@ -120,16 +120,26 @@ const int *id2(const int *x) { return x; }
   \item<2-> Question: What is the $\bot$ of this lattice? What is $\top$?\\
     \visible<3->{Answer: $\bot = \text{``nonzero''}, \top = \text{``const dynamic''}$}
   \end{itemize}
-  \todo{Intuition on qualifier lattice}
-  \todo{``Subset contradiction''}
 \end{frame}
 
 \begin{frame}{Preliminaries}{Qualifiers (3)}
   \begin{itemize}
+  \item How should we interpret $\tau \preceq \text{const}\,\tau$?
+    \begin{itemize}
+    \item<2-> Classical ``safe substitution principle'' from subtyping seems to fail: When $\text{const}\,\tau$ is expected we cannot generally replace with expressions of type $\tau$.
+    \item<3-> Rather, think of \textsc{const} as \emph{readable}.\\ Alternatively, consider the qualifier $\text{writable}\ \tau \preceq \tau$ which is dual notation for \textsc{const}.
+      % NOTE: Show the interpretation of ReadonlyInt and NormalInt on the board.
+    \end{itemize}
+  \item<4->[$\Rightarrow$] Intuition: We \emph{lose capabilities} as we move up the lattice.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Preliminaries}{Qualifiers (4)}
+  \begin{itemize}
   \item With each qualifier $q_i$ we associate a qualifier lattice element $\neg q_i$, where
     \begin{itemize}
-    \item[] $\neg q_i := (\top_1, \dots, \bot_i, \dots, \top_n)$ when $q_i$ is \emph{positive}, and
-    \item[] $\neg q_i := (\bot_1, \dots, \top_i, \dots, \bot_n)$ when $q_i$ is \emph{negative}.
+    \item[] $\neg q_i := (\top_1, \dots, \top_{i-1}, \bot_i, \top_{i+1}, \dots, \top_n)$ when $q_i$ is \emph{positive},
+    \item[] $\neg q_i := (\bot_1, \dots, \bot_{i-1}, \top_i, \bot_{i+1}, \dots, \bot_n)$ when $q_i$ is \emph{negative}.
     \end{itemize}
   \item<2-> Question: What is $\neg nonzero$?\\
     \visible<3->{Answer: $(\bot_\text{const}, \bot_\text{dynamic}, \top_\text{nonzero}) = \text{\lq\lq}\emptyset\text{''}$}
@@ -200,18 +210,30 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}{Qualifier annotations and assertions}
   \begin{itemize}
-  \item purpose of annotations: support type inference -- problem: which type qualifier to choose for a given inferred type?
-  \item ``qualifier annotations'' are added to the source language as a syntactic helper -- together with the resp.\ typing rule, qualifiers can only increase monotonically (``give up capabilities'')
-  \item additionally, dual notion of ``qualifier assertions''
-  \item source language extended (paper\_qualifierannass\_syntax), both enforce $e$'s top-level qualifier $Q_e$ to be upper-bounded by $l$, i.e.\ $Q_e \sqsubseteq l$ (-> Q)
-  \item cf.\ typing rules (paper\_samplelang\_annasstyping)
+  \item When inferring types, we need to decide on a type qualifier for the outermost type constructor.
+    \begin{itemize}
+    \item \emph{Qualifier annotations} are added as a syntactic helper
+      % -- together with the resp.\ typing rule, qualifiers can only increase monotonically (``give up capabilities'')
+      % NOTE: Mention this.
+    \item Additionally, dual notion of \emph{qualifier assertions}
+    \end{itemize}
+  \item This requires extensions of both syntax and typing rules:
+    \begin{center}
+    \includegraphics[scale=0.3]{paper_qualifierannass_syntax.png}
+    \hspace{1em}\vrule\hspace{1em}
+    \includegraphics[scale=0.3]{paper_samplelang_annasstyping.png}
+    \end{center}
+  \item<2-> Both enforce $e$'s top-level qualifier $Q$ to be upper-bounded by $l$, i.e.\ $Q \sqsubseteq l$
+    \begin{itemize}
+    \item Question: What's the difference between the two?
+      % NOTE: Follow-up question: What's the difference between Q and l?
+    \end{itemize}
   \end{itemize}
-  \todo{Split into multiple slides and expand}
 \end{frame}
 
-\note[itemize]{%
-  \item\emph{Q:} What's the difference between assertions and annotations? (Hint: Show typing rules)\\
-  \item\emph{Q/Follow-up:} What's the difference between Q and l?}
+% \note[itemize]{%
+%   \item\emph{Q:} What's the difference between assertions and annotations? (Hint: Show typing rules)\\
+%   \item\emph{Q/Follow-up:} What's the difference between Q and l?}
 
 
 \begin{frame}{Qualified type systems}
@@ -243,8 +265,8 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}{Qualified type systems}{Correspondence}
   \begin{itemize}
-  \item type qualifiers should only refine type information,\\ but \emph{not} modify type structure
-  \item[$\Rightarrow$] correspondence of the original and resp.\ qualified type system
+  \item Type qualifiers should only refine type information,\\ but \emph{not} modify type structure.
+  \item[$\Rightarrow$] Correspondence of the original and resp.\ qualified type system
   \item<2-> Helpers:\\
     \begin{description}
     \item[$\mathit{Typ} \rightarrow \mathit{QTyp}$:] $\text{strip}(\cdot)$ \ldots eliminates qualifiers \& annotations\\
@@ -263,8 +285,7 @@ const int *id2(const int *x) { return x; }
   %   \vspace{1em}
   %   \includegraphics[scale=0.25]{paper_observation1.png}
   %   \end{center}
-    \visible<4->{\todo{Verify that this is line with the paper's definition of $\bot(\cdot)$.}
-      \todo{Improve readability.}}
+    \visible<4->{\todo{Verify that this is line with the paper's definition of $\bot(\cdot)$.}}
   \end{itemize}
 \end{frame}
 
@@ -275,10 +296,15 @@ const int *id2(const int *x) { return x; }
   \begin{center}
   \includegraphics[scale=0.25]{paper_observation1.png}
   \end{center}
+
+  \bigskip
+  \begin{itemize}
+  \item<2-> Question: Could we use $\top$ instead? Any other qualifier?
+  \end{itemize}
 \end{frame}
 
-\note[itemize]{%
-  \item\emph{Q:} Ad $\bot(\cdot)$. Could we use $\top$ instead? Any other qualifier?\\\quad$\rightarrow$ Here, the choice of qualifier is unimportant.}
+% \note[itemize]{%
+%   \item\emph{Q:} Ad $\bot(\cdot)$. Could we use $\top$ instead? Any other qualifier?\\\quad$\rightarrow$ Here, the choice of qualifier is unimportant.}
 
 
 \begin{frame}{Qualifier semantics}
