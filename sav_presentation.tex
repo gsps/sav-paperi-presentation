@@ -126,8 +126,10 @@ const int *id2(const int *x) { return x; }
   \begin{itemize}
   \item How should we interpret $\tau \preceq \text{const}\,\tau$?
     \begin{itemize}
-    \item<2-> Classical ``safe substitution principle'' from subtyping seems to fail: When $\text{const}\,\tau$ is expected we cannot generally replace with expressions of type $\tau$.
-    \item<3-> Rather, think of \textsc{const} as \emph{readable}.\\ Alternatively, consider the qualifier $\text{writable}\ \tau \preceq \tau$ which is dual notation for \textsc{const}.
+    \item<2-> $\preceq$ corresponds to $\subseteq$, so ``int $\preceq$ const int'' means\\ ``(set of all ints) $\subseteq$ (set of all const ints)''.\\
+    So each int is constant, all data immutable!?
+%    \item<2-> Classical ``safe substitution principle'' from subtyping seems to fail: When $\text{const}\,\tau$ is expected we cannot generally replace with expressions of type $\tau$.
+    \item<3-> Rather, think of \textsc{const} as \emph{readonly}.\\ Alternatively, consider the qualifier $\text{writable}\ \tau \preceq \tau$ which is dual notation for \textsc{const}.
       % NOTE: Show the interpretation of ReadonlyInt and NormalInt on the board.
     \end{itemize}
   \item<4->[$\Rightarrow$] Intuition: We \emph{lose capabilities} as we move up the lattice.
@@ -226,6 +228,7 @@ const int *id2(const int *x) { return x; }
   \item<2-> Both enforce $e$'s top-level qualifier $Q$ to be upper-bounded by $l$, i.e.\ $Q \sqsubseteq l$
     \begin{itemize}
     \item Question: What's the difference between the two?
+      % NOTE: Maybe also ask: Which one corresponds to ascription in Scala?
       % NOTE: Follow-up question: What's the difference between Q and l?
     \end{itemize}
   \end{itemize}
@@ -268,24 +271,26 @@ const int *id2(const int *x) { return x; }
   \item Type qualifiers should only refine type information,\\ but \emph{not} modify type structure.
   \item[$\Rightarrow$] Correspondence of the original and resp.\ qualified type system
   \item<2-> Helpers:\\
-    \begin{description}
-    \item[$\mathit{Typ} \rightarrow \mathit{QTyp}$:] $\text{strip}(\cdot)$ \ldots eliminates qualifiers \& annotations\\
-      \visible<3->{\vspace{0.5em}\hspace{-4em}
-        $\text{strip}(\,\overline{\bot(\text{const}\ \text{int} \to \text{nonzero}\ \text{int})}\,) =
+    \begin{itemize}
+    \item $\text{strip}(\cdot): \mathit{QTyp} \rightarrow \mathit{Typ}~~$ eliminates qualifiers from types\\
+      \visible<3->{\vspace{0.5em}
+        Example: $\text{strip}(\,\overline{\bot(\text{const}\ \text{int} \to \text{nonzero}\ \text{int})}\,) =
          \overline{(\text{int} \to \text{int})}$
         }
-    \item[$\mathit{QTyp} \rightarrow \mathit{Typ}$:] $\bot(\cdot)$ \ldots introduces $\bot$ qualifiers \& annotations\\
-      \visible<4->{\vspace{0.5em}\hspace{-4em}
-        $\bot(\,\overline{(\text{int} \to \text{int})}\,) =
+    \item $\bot(\cdot): \mathit{Typ} \rightarrow \mathit{QTyp}~~$ introduces $\bot$ qualifiers in types\\
+      \visible<4->{\vspace{0.5em}
+        Example $\bot(\,\overline{(\text{int} \to \text{int})}\,) =
           \overline{\bot(\bot\ \text{int} \to \bot\ \text{int})}$
         }
-    \end{description}
+    \item<5-> $\text{strip}(\cdot): \mathit{Expr} \rightarrow \mathit{Expr}~~$ eliminates annotations \& assertions\\
+    \item<5-> $\bot(\cdot): \mathit{Expr} \rightarrow \mathit{Expr}~~$ introduces $\bot$ qualifier annotations everywhere
+    \end{itemize}
   % \item[]<2->
   %   \begin{center}
   %   \vspace{1em}
   %   \includegraphics[scale=0.25]{paper_observation1.png}
   %   \end{center}
-    \visible<4->{\todo{Verify that this is line with the paper's definition of $\bot(\cdot)$.}}
+    %\visible<4->{done{Verify that this is line with the paper's definition of $\bot(\cdot)$.}}
   \end{itemize}
 \end{frame}
 
