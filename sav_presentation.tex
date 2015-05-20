@@ -1,5 +1,5 @@
 \documentclass{beamer}
-\setbeameroption{show notes}
+% \setbeameroption{show notes}
 \setbeamerfont{framesubtitle}{size=\normalfont\large}
 \setbeamertemplate{footline}[frame number]
 \setbeamertemplate{navigation symbols}{}
@@ -63,12 +63,12 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}[fragile]{Motivation}
   \begin{itemize}
-  \item Paper's presentation is closely tied to \textsc{const} qualifier in C
-    \begin{itemize}\item What are the semantics of \textsc{const} in C?\end{itemize}
+  % \item Paper's presentation is closely tied to \textsc{const} qualifier in C
+  %   \begin{itemize}\item What are the semantics of \textsc{const} in C?\end{itemize}
 
-  \item<2-> Use-case: Analyze C sources and infer additional \textsc{const} qualifiers
+  \item<1-> Use-case: Analyze C sources and infer additional \textsc{const} qualifiers
 
-  \item<3->
+  \item<2->
     This rectifies one particular peculiarity of C's type system:
     % \vspace{1em}
     \lstcduplicateprocs
@@ -126,9 +126,8 @@ const int *id2(const int *x) { return x; }
   \begin{itemize}
   \item How should we interpret $\tau \preceq \text{const}\,\tau$?
     \begin{itemize}
-    \item<2-> $\preceq$ corresponds to $\subseteq$, so ``int $\preceq$ const int'' means\\ ``(set of all ints) $\subseteq$ (set of all const ints)''.\\
+    \item<2-> Assuming $\preceq$ corresponds to $\subseteq$, ``int $\preceq$ const int'' means\\ ``(set of all ints) $\subseteq$ (set of all const ints)''.\\
     So each int is constant, all data immutable!?
-%    \item<2-> Classical ``safe substitution principle'' from subtyping seems to fail: When $\text{const}\,\tau$ is expected we cannot generally replace with expressions of type $\tau$.
     \item<3-> Rather, think of \textsc{const} as \emph{readonly}.\\ Alternatively, consider the qualifier $\text{writable}\ \tau \preceq \tau$ which is dual notation for \textsc{const}.
       % NOTE: Show the interpretation of ReadonlyInt and NormalInt on the board.
     \end{itemize}
@@ -177,8 +176,8 @@ const int *id2(const int *x) { return x; }
 \begin{frame}{Preliminaries}{Source language}
   Framework extends a given source language, e.g.\
   \begin{itemize}
-  \item Types over set of \emph{type constructors} $c \in \Sigma$ and \emph{type variables} $\alpha$:
-    \begin{center}\includegraphics[scale=0.25]{paper_typ.png}\end{center}
+  % \item Types over set of \emph{type constructors} $c \in \Sigma$ and \emph{type variables} $\alpha$:
+  %   \begin{center}\includegraphics[scale=0.25]{paper_typ.png}\end{center}
   \item Expressions of $\lambda$-calculus with \textsc{if} and \textsc{let}:
     \begin{center}\includegraphics[scale=0.25]{paper_sourcelang.png}\end{center}
   \end{itemize}
@@ -198,14 +197,14 @@ const int *id2(const int *x) { return x; }
 
 
 \begin{frame}{Qualified types}
-  Pairing ordinary types with elements of the qualifier lattice yields \emph{qualified types}:
-  \begin{center}\includegraphics[scale=0.25]{paper_qtyp.png}\end{center}
-\end{frame}
-
-\begin{frame}{Qualified types (2)}
-  Given our sample source language, we get types of the form
+  Pairing ordinary types with elements of the qualifier lattice yields \emph{qualified types} for our sample language:
   \begin{center}\includegraphics[scale=0.38]{paper_qualifiedtypegrammar.png}\end{center}
-  along with a pair of subtyping rules that naturally connects the type system to our qualifier lattice:
+  \begin{tabbing}
+  \hspace{4em} where \= $\kappa$ is a type qualifier variable and\\
+  \> $l$ is an element of qualifier lattice $L$.
+  \end{tabbing}
+
+  Along with a pair of subtyping rules that naturally connects the type system to our qualifier lattice:
   \begin{center}\includegraphics[scale=0.30]{paper_samplelang_subtypingrules.png}\end{center}
 \end{frame}
 
@@ -256,14 +255,14 @@ const int *id2(const int *x) { return x; }
 \end{frame}
 
 \note[itemize]{%
-  \item Discuss unrestricted type qualifier $Q$ in premises.
   \item Discuss how terminal expressions are assigned type qualifier $\bot$.}
 
 \begin{frame}{Qualified type systems}{Typing rules of sample language (2)}
   \includegraphics[scale=0.4]{paper_samplelang_typingrules2.png}
 \end{frame}
 
-\note[itemize]{\item\emph{Q:} Ad $(\text{App})$. What role do qualifiers on abstractions play in this paper?}
+\note[itemize]{\item Discuss unrestricted type qualifier $Q$ in premises.
+  \item\emph{Q:} Ad $(\text{App})$. What role do qualifiers on abstractions play in this paper?}
 
 
 \begin{frame}{Qualified type systems}{Correspondence}
@@ -338,7 +337,7 @@ const int *id2(const int *x) { return x; }
 
 \begin{frame}{Qualifier semantics}{\textsc{const} example (2)}
   \begin{itemize}
-  \item A first attempt:
+  \item We first introduce a subtyping rule for \textsc{ref}:
     \begin{center}
     \includegraphics[scale=0.29]{paper_ref_unsound.png}
     \end{center}
@@ -362,11 +361,11 @@ const int *id2(const int *x) { return x; }
     \begin{center}
     \includegraphics[scale=0.29]{paper_ref_sound.png}
     \end{center}
-  \item<2-> Generally, subtyping rules of the form
-    \begin{center}
-    \includegraphics[scale=0.3]{paper_subtypingrule_general.png}
-    \end{center}
-    are sound.
+  % \item<2-> Generally, subtyping rules of the form
+  %   \begin{center}
+  %   \includegraphics[scale=0.3]{paper_subtypingrule_general.png}
+  %   \end{center}
+  %   are sound.
   \end{itemize}
 \end{frame}
 
@@ -375,7 +374,7 @@ const int *id2(const int *x) { return x; }
   \item How do we enforce the semantics of \textsc{const}?
   \item<2-> As mentioned before, there are two ways to encode such restrictions:
     \begin{enumerate}[a)]
-    \item<2-> Program transformation:\\ Replace every assignment $e\,=\,e_1\!:=\!e_2$ by $e\!\mid_{\neg\text{const}}$.
+    \item<2-> Program transformation:\\ Replace every assignment $e_1\!:=\!e_2$ by $e_1\!\mid_{\neg\text{const}}\,:=\!e_2$.
     \item<3-> Modify the relevant typing rule(s):\\
       \begin{center}
       \includegraphics[scale=0.25]{paper_assign_original.png}\\
